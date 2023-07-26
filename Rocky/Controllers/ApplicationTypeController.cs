@@ -18,5 +18,21 @@ namespace Rocky.Controllers
             IEnumerable<ApplicationType> objList = _dB.ApplicationType;
             return View(objList);
         }
+
+        // GET - Create
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // POST - Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(ApplicationType obj)
+        {
+            _dB.ApplicationType.Add(obj);
+            _dB.SaveChanges();
+            return RedirectToAction("Index");
+        }
     }
 }
