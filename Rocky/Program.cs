@@ -9,9 +9,6 @@ using System.Threading.Tasks;
 
 namespace Rocky
 {
-    /// <summary>
-    /// test
-    /// </summary>
     public class Program
     {
         public static void Main(string[] args)
