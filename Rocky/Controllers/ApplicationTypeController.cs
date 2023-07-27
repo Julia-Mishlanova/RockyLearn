@@ -34,5 +34,67 @@ namespace Rocky.Controllers
             _dB.SaveChanges();
             return RedirectToAction("Index");
         }
+
+        // GET - Edit
+        public IActionResult Edit(int? id)
+        {
+            if (id == null || id == 0) 
+            { 
+                return NotFound();
+            }
+
+            var obj = _dB.ApplicationType.Find(id);
+
+            if (obj == null) 
+            {
+                return NotFound();
+            }
+            return View(obj);
+        }
+
+        // POST - Edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(ApplicationType obj)
+        {
+            if (ModelState.IsValid)
+            {
+                _dB.ApplicationType.Update(obj);
+                _dB.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            return View();
+        }
+
+        // GET - Delete
+        public IActionResult Delete(int? id)
+        {
+            if (id == null || id == 0)
+            {
+                return NotFound();
+            }
+
+            var obj = _dB.ApplicationType.Find(id);
+
+            if (obj == null)
+            {
+                return NotFound();
+            }
+            return View(obj);
+        }
+
+        // POST - Delete
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(ApplicationType obj)
+        {
+            if (obj == null)
+            {
+                return NotFound();
+            }
+            _dB.ApplicationType.Remove(obj);
+            _dB.SaveChanges();
+            return RedirectToAction("Index");
+        }
     }
 }
