@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Rocky.Data;
 using Rocky.Models;
+using Rocky.Models.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -28,17 +30,36 @@ namespace Rocky.Controllers
         // GET - Upsert
         public IActionResult Upsert(int? id)
         {
-            Product product = new Product();
+            //IEnumerable<SelectListItem> CategoryDropDown = _dB.Category.Select(x => new SelectListItem() 
+            //{ 
+            //    Text = x.Name,
+            //    Value = x.Id.ToString(),
+            //});
+
+            //ViewBag.CategoryDropDown = CategoryDropDown;
+
+            //Product product = new Product();
+
+            ProductVM productVM = new ProductVM()
+            {
+                Product = new Product(),
+                CategorySelectList = _dB.Category.Select(x => new SelectListItem()
+                {
+                    Text = x.Name,
+                    Value = x.Id.ToString(),
+                })
+            };
+
             if (id == null)
             {
-                return View(product);
+                return View(productVM);
             }
             else
             {
-                product = _dB.Product.Find(id);
+                productVM.Product = _dB.Product.Find(id);
 
-                if (product == null) return NotFound();
-                return View(product);
+                if (productVM.Product == null) return NotFound();
+                return View(productVM.Product);
             }
         }
 
