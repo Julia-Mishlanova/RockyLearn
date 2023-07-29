@@ -28,6 +28,9 @@
                     <th>
                         Category
                     </th>
+                    <th>
+                        Application Type
+                    </th>
                     <th></th>
                 </tr>
             </thead>
@@ -38,6 +41,7 @@
                         <td width="30%">@obj.Name</td>
                         <td width="10%">@obj.Price</td>
                         <td width="20%">@obj.Category.Name</td>
+                        <td width="20%">@obj.ApplicationType.Name</td>
                         <td class="text-center">
                             <div class="w-75 btn-group" role="group">
                                 <a asp-route-Id="@obj.Id" asp-action="Upsert" class="btn btn-primary mx-2">
