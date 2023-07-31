@@ -32,12 +32,7 @@
                         <label asp-for="Description"></label>
                     </div>
                     <div class="col-8">
-                        @{
-                            var description = Model.Description;
-                            var trimDesc = description.Substring(3);
-                            trimDesc = trimDesc.Substring(0, trimDesc.Length - 4);
-                        }
-                        <input asp-for="@trimDesc" disabled class="form-control" />
+                        <textarea asp-for="Description" class="form-control summernote"></textarea>
                     </div>
 
                 </div>
