@@ -6,14 +6,34 @@ using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
 using Rocky.Models;
 using System.Net;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Rocky.Controllers.Interfaces;
 
 namespace Rocky.Utility
 {
-    public class EmailSender : IEmailSender
+    public class EmailSender : IMailSender
     {
-        public Task SendEmailAsync(string email, string subject, string htmlMessage)
+        public void SendEmail(string AdminEmail, MimeMessage message, string messageBody)
         {
-            return null;
+            // Создаем HTML-тело сообщения
+            var bodyBuilder = new BodyBuilder();
+            bodyBuilder.HtmlBody = messageBody;
+
+            // Прикрепляем HTML-тело к сообщению
+            message.Body = bodyBuilder.ToMessageBody();
+
+            var configuration = new ConfigurationBuilder()
+                .AddUserSecrets<Program>()
+                .Build();
+
+            var val = configuration["pw"];
+            using (var client = new SmtpClient())
+            {
+                client.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+                client.Authenticate(AdminEmail, val);
+                client.Send(message);
+                client.Disconnect(true);
+            }
         }
     }
 }

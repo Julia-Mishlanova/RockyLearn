@@ -12,14 +12,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Rocky.Data;
 using Rocky.Models;
 using Rocky.Models.ViewModels;
 using Rocky.Utility;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
+using Rocky.Controllers.Interfaces;
 
 namespace Rocky.Controllers
 {
@@ -28,15 +27,19 @@ namespace Rocky.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly IEmailSender _emailSender;
+        private readonly IMailSender _mailSender;
+        private readonly IMailTemplater _mailTemplater;
+        private readonly IMessageFormater _messageFormater;
 
         [BindProperty]
         public ProductUserVM ProductUserVM { get; set; }
-        public CartController(ApplicationDbContext db, IWebHostEnvironment webHostEnvironment, IEmailSender emailSender)
+        public CartController(ApplicationDbContext db, IWebHostEnvironment webHostEnvironment, IMailSender mailSender, IMailTemplater mailTemplater, IMessageFormater messageFormater)
         {
             _db = db;
             _webHostEnvironment = webHostEnvironment;
-            _emailSender = emailSender;
+            _mailSender = mailSender;
+            _mailTemplater = mailTemplater;
+            _messageFormater = messageFormater;
         }
         public IActionResult Index()
         {
@@ -95,60 +98,12 @@ namespace Rocky.Controllers
         [ActionName("Summary")]
         public async Task<IActionResult> SummaryPost(ProductUserVM ProductUserVM)
         {
-            var PathToTemplate = _webHostEnvironment.WebRootPath + Path.DirectorySeparatorChar.ToString()
-                + "templates" + Path.DirectorySeparatorChar.ToString() +
-                "Inquiry.html";
+            var sender = new MailboxAddress("Rocky", "qwerty123456789qwertyytrewq@gmail.com");
+            var receiver = new MailboxAddress(ProductUserVM.ApplicationUser.FullName, ProductUserVM.ApplicationUser.Email);
 
-            string HtmlBody = "";
-            using (StreamReader sr = System.IO.File.OpenText(PathToTemplate))
-            {
-                HtmlBody = sr.ReadToEnd();
-            }
-            //Name: { 0}
-            //Email: { 1}
-            //Phone: { 2}
-            //Products: {3}
-
-            StringBuilder productListSB = new StringBuilder();
-            foreach (var prod in ProductUserVM.ProductList)
-            {
-                productListSB.Append($" - Name: {prod.Name} <span style='font-size:14px;'> (ID: {prod.Id})</span><br />");
-            }
-
-            string messageBody = string.Format(HtmlBody,
-                ProductUserVM.ApplicationUser.FullName,
-                ProductUserVM.ApplicationUser.Email,
-                ProductUserVM.ApplicationUser.PhoneNumber,
-                productListSB.ToString());
-
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("Rocky", "qwerty123456789qwertyytrewq@gmail.com"));
-            message.To.Add(new MailboxAddress(ProductUserVM.ApplicationUser.FullName, ProductUserVM.ApplicationUser.Email));
-            message.Subject = "Subject";
-            message.Body = new TextPart("plain")
-            {
-                Text = messageBody
-            };
-
-            // Создаем HTML-тело сообщения
-            var bodyBuilder = new BodyBuilder();
-            bodyBuilder.HtmlBody = messageBody;
-
-            // Прикрепляем HTML-тело к сообщению
-            message.Body = bodyBuilder.ToMessageBody();
-
-            var configuration = new ConfigurationBuilder()
-                .AddUserSecrets<Program>()
-                .Build();
-
-            var val = configuration["pw"];
-            using (var client = new SmtpClient())
-            {
-                client.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
-                client.Authenticate("qwerty123456789qwertyytrewq@gmail.com", val);
-                client.Send(message);
-                client.Disconnect(true);
-            }
+            var messageBody = _mailTemplater.GetMessageBody(ProductUserVM, _webHostEnvironment);
+            var message = _messageFormater.GetMimeMessage(messageBody, sender, receiver);
+            _mailSender.SendEmail("qwerty123456789qwertyytrewq@gmail.com", message, messageBody);
 
             return RedirectToAction(nameof(InquiryConfirmation));
         }
