@@ -1,6 +1,6 @@
 ﻿using MimeKit;
 
-namespace Rocky.Controllers.Interfaces
+namespace Rocky.Interfaces
 {
     public interface IMailSender
     {

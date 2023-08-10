@@ -7,7 +7,7 @@ using Rocky_Models;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Rocky.Controllers.Interfaces;
+using Rocky.Interfaces;
 
 namespace Rocky.Utility
 {
@@ -21,7 +21,7 @@ namespace Rocky.Utility
 
             // Прикрепляем HTML-тело к сообщению
             message.Body = bodyBuilder.ToMessageBody();
-
+            //я тебя люблю!!!!!!
             var configuration = new ConfigurationBuilder()
                 .AddUserSecrets<Program>()
                 .Build();

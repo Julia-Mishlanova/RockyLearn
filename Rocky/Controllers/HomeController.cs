@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Rocky.Data;
 using Rocky_Models;
 using Rocky_Models.ViewModels;
 using Rocky.Utility;
@@ -11,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Rocky_DataAccess.Data;
 
 namespace Rocky.Controllers
 {

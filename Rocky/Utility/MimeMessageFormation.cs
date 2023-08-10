@@ -1,5 +1,5 @@
 ﻿using MimeKit;
-using Rocky.Controllers.Interfaces;
+using Rocky.Interfaces;
 
 namespace Rocky.Utility
 {

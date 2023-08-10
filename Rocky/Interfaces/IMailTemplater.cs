@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Rocky_Models.ViewModels;
 
-namespace Rocky.Controllers.Interfaces
+namespace Rocky.Interfaces
 {
     public interface IMailTemplater
     {

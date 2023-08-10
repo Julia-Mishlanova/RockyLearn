@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Rocky_Models;
 
-namespace Rocky.Data
+namespace Rocky_DataAccess.Data
 {
     public class ApplicationDbContext : IdentityDbContext
     {

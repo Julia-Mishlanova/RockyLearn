@@ -13,12 +13,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Rocky.Data;
 using Rocky_Models;
 using Rocky_Models.ViewModels;
 using Rocky.Utility;
 using Microsoft.Extensions.Primitives;
-using Rocky.Controllers.Interfaces;
+using Rocky_DataAccess.Data;
+using Rocky.Interfaces;
 
 namespace Rocky.Controllers
 {
