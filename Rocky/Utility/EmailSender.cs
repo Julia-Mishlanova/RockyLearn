@@ -3,7 +3,7 @@ using MimeKit;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
-using Rocky.Models;
+using Rocky_Models;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;

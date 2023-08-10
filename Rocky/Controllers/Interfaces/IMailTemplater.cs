@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
-using Rocky.Models.ViewModels;
+using Rocky_Models.ViewModels;
 
 namespace Rocky.Controllers.Interfaces
 {

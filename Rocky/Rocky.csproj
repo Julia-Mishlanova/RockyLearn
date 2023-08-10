@@ -29,4 +29,8 @@
     <Folder Include="wwwroot\images\product\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Rocky_Models\Rocky_Models.csproj" />
+  </ItemGroup>
+
 </Project>

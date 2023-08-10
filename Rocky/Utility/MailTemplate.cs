@@ -1,7 +1,7 @@
 ﻿using MailKit;
 using Microsoft.AspNetCore.Hosting;
 using Rocky.Controllers.Interfaces;
-using Rocky.Models.ViewModels;
+using Rocky_Models.ViewModels;
 using System.IO;
 using System.Text;
 
