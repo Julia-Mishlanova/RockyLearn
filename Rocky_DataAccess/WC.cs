@@ -1,4 +1,4 @@
-﻿namespace Rocky
+﻿namespace Rocky_DataAccess
 {
     public static class WC
     {

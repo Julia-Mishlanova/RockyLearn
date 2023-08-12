@@ -20,14 +20,15 @@ namespace Rocky_DataAccess.Repository
             _db = db;
             this.dbSet = _db.Set<T>();
         }
+
         public void Add(T entity)
         {
-            _db.Add(entity);
+            dbSet.Add(entity);
         }
 
         public T Find(int? id)
         {
-            return _db.Find<T>(id);
+            return dbSet.Find(id);
         }
 
         public T FirstOrDefault(Expression<Func<T, bool>> filter = null, string includeProperties = null, bool isTracking = true)
@@ -39,9 +40,9 @@ namespace Rocky_DataAccess.Repository
             }
             if (includeProperties != null)
             {
-                foreach (var prop in includeProperties.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    query = query.Include(includeProperties);
+                    query = query.Include(includeProp);
                 }
             }
             if (!isTracking)
@@ -60,9 +61,9 @@ namespace Rocky_DataAccess.Repository
             }
             if (includeProperties != null)
             {
-                foreach (var prop in includeProperties.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    query = query.Include(includeProperties);
+                    query = query.Include(includeProp);
                 }
             }
             if (orderBy != null)
@@ -78,7 +79,12 @@ namespace Rocky_DataAccess.Repository
 
         public void Remove(T entity)
         {
-            _db.Remove(entity);
+            dbSet.Remove(entity);
+        }
+
+        public void RemoveRange(IEnumerable<T> entity)
+        {
+            dbSet.RemoveRange(entity);
         }
 
         public void Save()

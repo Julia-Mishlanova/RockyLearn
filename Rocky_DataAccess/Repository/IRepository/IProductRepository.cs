@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore.Update.Internal;
+using Rocky_Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +9,9 @@ using System.Threading.Tasks;
 
 namespace Rocky_DataAccess.Repository.IRepository
 {
-    internal interface IProductRepository
+    public interface IProductRepository : IRepository<Product>
     {
+        void Update(Product obj);
+        IEnumerable<SelectListItem> GetAllDropdownList(string obj);
     }
 }

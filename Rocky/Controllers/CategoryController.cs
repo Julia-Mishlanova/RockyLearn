@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Rocky_DataAccess;
 using Rocky_DataAccess.Data;
 using Rocky_DataAccess.Repository.IRepository;
 using Rocky_Models;

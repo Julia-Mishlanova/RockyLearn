@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Rocky_DataAccess;
 using Rocky_DataAccess.Data;
 using Rocky_DataAccess.Repository.IRepository;
 using Rocky_Models;
@@ -19,7 +20,7 @@ namespace Rocky.Controllers
         }
         public IActionResult Index()
         {
-            IEnumerable<ApplicationType> objList = _appTypeRepos.ApplicationType;
+            IEnumerable<ApplicationType> objList = _appTypeRepos.GetAll();
             return View(objList);
         }
 
@@ -36,8 +37,8 @@ namespace Rocky.Controllers
         {
             if (ModelState.IsValid)
             {
-                _appTypeRepos.ApplicationType.Add(obj);
-                _appTypeRepos.SaveChanges();
+                _appTypeRepos.Add(obj);
+                _appTypeRepos.Save();
                 return RedirectToAction("Index");
             }
             return View();
@@ -51,7 +52,7 @@ namespace Rocky.Controllers
                 return NotFound();
             }
 
-            var obj = _appTypeRepos.ApplicationType.Find(id);
+            var obj = _appTypeRepos.Find(id);
 
             if (obj == null) 
             {
@@ -67,8 +68,8 @@ namespace Rocky.Controllers
         {
             if (ModelState.IsValid)
             {
-                _appTypeRepos.ApplicationType.Update(obj);
-                _appTypeRepos.SaveChanges();
+                _appTypeRepos.Update(obj);
+                _appTypeRepos.Save();
                 return RedirectToAction("Index");
             }
             return View();
@@ -82,7 +83,7 @@ namespace Rocky.Controllers
                 return NotFound();
             }
 
-            var obj = _appTypeRepos.ApplicationType.Find(id);
+            var obj = _appTypeRepos.Find(id);
 
             if (obj == null)
             {
@@ -100,8 +101,8 @@ namespace Rocky.Controllers
             {
                 return NotFound();
             }
-            _appTypeRepos.ApplicationType.Remove(obj);
-            _appTypeRepos.SaveChanges();
+            _appTypeRepos.Remove(obj);
+            _appTypeRepos.Save();
             return RedirectToAction("Index");
         }
     }
