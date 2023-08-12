@@ -7,5 +7,10 @@
 
         public const string AdminRole = "Admin";
         public const string CustomerRole = "Customer";
+
+        public const string EmailAdmin = "qwerty123456789qwertyytrewq@gmail.com";
+
+        public const string CategoryName = "Category";
+        public const string ApplicationTypeName = "ApplicationType";
     }
 }

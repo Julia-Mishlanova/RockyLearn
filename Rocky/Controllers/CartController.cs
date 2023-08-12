@@ -98,12 +98,12 @@ namespace Rocky.Controllers
         [ActionName("Summary")]
         public async Task<IActionResult> SummaryPost(ProductUserVM ProductUserVM)
         {
-            var sender = new MailboxAddress("Rocky", "qwerty123456789qwertyytrewq@gmail.com");
+            var sender = new MailboxAddress("Rocky", WC.EmailAdmin);
             var receiver = new MailboxAddress(ProductUserVM.ApplicationUser.FullName, ProductUserVM.ApplicationUser.Email);
 
             var messageBody = _mailTemplater.GetMessageBody(ProductUserVM, _webHostEnvironment);
             var message = _messageFormater.GetMimeMessage(messageBody, sender, receiver);
-            _mailSender.SendEmail("qwerty123456789qwertyytrewq@gmail.com", message, messageBody);
+            _mailSender.SendEmail(WC.EmailAdmin, message, messageBody);
 
             return RedirectToAction(nameof(InquiryConfirmation));
         }

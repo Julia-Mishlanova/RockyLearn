@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Rocky_DataAccess.Data;
+using Rocky_DataAccess.Repository.IRepository;
 using Rocky_Models;
 using System.Collections.Generic;
 using System.Data;
@@ -10,15 +11,15 @@ namespace Rocky.Controllers
     [Authorize(Roles = WC.AdminRole)]
     public class ApplicationTypeController : Controller
     {
-        private readonly ApplicationDbContext _dB;
+        private readonly IApplicationTypeRepository _appTypeRepos;
 
-        public ApplicationTypeController(ApplicationDbContext dB)
+        public ApplicationTypeController(IApplicationTypeRepository appTypeRepos)
         {
-            _dB = dB;
+            _appTypeRepos = appTypeRepos;
         }
         public IActionResult Index()
         {
-            IEnumerable<ApplicationType> objList = _dB.ApplicationType;
+            IEnumerable<ApplicationType> objList = _appTypeRepos.ApplicationType;
             return View(objList);
         }
 
@@ -35,8 +36,8 @@ namespace Rocky.Controllers
         {
             if (ModelState.IsValid)
             {
-                _dB.ApplicationType.Add(obj);
-                _dB.SaveChanges();
+                _appTypeRepos.ApplicationType.Add(obj);
+                _appTypeRepos.SaveChanges();
                 return RedirectToAction("Index");
             }
             return View();
@@ -50,7 +51,7 @@ namespace Rocky.Controllers
                 return NotFound();
             }
 
-            var obj = _dB.ApplicationType.Find(id);
+            var obj = _appTypeRepos.ApplicationType.Find(id);
 
             if (obj == null) 
             {
@@ -66,8 +67,8 @@ namespace Rocky.Controllers
         {
             if (ModelState.IsValid)
             {
-                _dB.ApplicationType.Update(obj);
-                _dB.SaveChanges();
+                _appTypeRepos.ApplicationType.Update(obj);
+                _appTypeRepos.SaveChanges();
                 return RedirectToAction("Index");
             }
             return View();
@@ -81,7 +82,7 @@ namespace Rocky.Controllers
                 return NotFound();
             }
 
-            var obj = _dB.ApplicationType.Find(id);
+            var obj = _appTypeRepos.ApplicationType.Find(id);
 
             if (obj == null)
             {
@@ -99,8 +100,8 @@ namespace Rocky.Controllers
             {
                 return NotFound();
             }
-            _dB.ApplicationType.Remove(obj);
-            _dB.SaveChanges();
+            _appTypeRepos.ApplicationType.Remove(obj);
+            _appTypeRepos.SaveChanges();
             return RedirectToAction("Index");
         }
     }

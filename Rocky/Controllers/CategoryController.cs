@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Rocky_DataAccess.Data;
+using Rocky_DataAccess.Repository.IRepository;
 using Rocky_Models;
 using System.Collections.Generic;
 using System.Data;
@@ -10,15 +11,15 @@ namespace Rocky.Controllers
     [Authorize(Roles = WC.AdminRole)]
     public class CategoryController : Controller
     {
-        private readonly ApplicationDbContext _dB;
+        private readonly ICategoryRepository _catRepos;
 
-        public CategoryController (ApplicationDbContext dB)
+        public CategoryController (ICategoryRepository catRepos)
         {
-            _dB = dB;
+            _catRepos = catRepos;
         }
         public IActionResult Index()
         {
-            IEnumerable<Category> objList = _dB.Category; 
+            IEnumerable<Category> objList = _catRepos.GetAll(); 
             return View(objList);
         }
 
@@ -35,8 +36,8 @@ namespace Rocky.Controllers
         {
             if (ModelState.IsValid) 
             {
-                _dB.Category.Add(obj);
-                _dB.SaveChanges();
+                _catRepos.Add(obj);
+                _catRepos.Save();
                 return RedirectToAction("Index");
             }
             return View();
@@ -50,7 +51,7 @@ namespace Rocky.Controllers
                 return NotFound();
             }
 
-            var obj = _dB.Category.Find(id);
+            var obj = _catRepos.Find(id);
 
             if (obj == null) 
             { 
@@ -66,8 +67,8 @@ namespace Rocky.Controllers
         {
             if (ModelState.IsValid)
             {
-                _dB.Category.Update(obj);
-                _dB.SaveChanges();
+                _catRepos.Update(obj);
+                _catRepos.Save();
                 return RedirectToAction("Index");
             }
             return View();
@@ -81,7 +82,7 @@ namespace Rocky.Controllers
                 return NotFound();
             }
 
-            var obj = _dB.Category.Find(id);
+            var obj = _catRepos.Find(id);
 
             if (obj == null)
             {
@@ -99,8 +100,8 @@ namespace Rocky.Controllers
             {
                 return NotFound();
             }
-            _dB.Category.Remove(obj);
-            _dB.SaveChanges();
+            _catRepos.Remove(obj);
+            _catRepos.Save();
             return RedirectToAction("Index");
         }
     }
