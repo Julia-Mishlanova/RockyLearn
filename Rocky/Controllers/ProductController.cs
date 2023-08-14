@@ -13,6 +13,7 @@ using Rocky_DataAccess.Repository.IRepository;
 using Rocky_Models;
 using Rocky_Models.ViewModels;
 using Rocky.Utility;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Rocky.Controllers
 {
@@ -106,6 +107,7 @@ namespace Rocky.Controllers
                     productVM.Product.Image = fileName + extension;
 
                     _prodRepos.Add(productVM.Product);
+                    TempData[WC.Success] = "Product created successfully";
                 }
                 else
                 {
@@ -137,6 +139,7 @@ namespace Rocky.Controllers
                         productVM.Product.Image = objFromDb.Image;
                     }
                     _prodRepos.Update(productVM.Product);
+                    TempData[WC.Success] = "Product update successfully";
                 }
 
                 _prodRepos.Save();
@@ -176,6 +179,7 @@ namespace Rocky.Controllers
             var obj = _prodRepos.Find(id.GetValueOrDefault());
             if (obj == null)
             {
+                TempData[WC.Error] = "Error while deleting Product";
                 return NotFound();
             }
 
@@ -186,10 +190,16 @@ namespace Rocky.Controllers
             {
                 System.IO.File.Delete(oldFile);
             }
+            else 
+            {
+                TempData[WC.Error] = "Error while deleting Product";
+                return NotFound();
+            }
 
 
             _prodRepos.Remove(obj);
             _prodRepos.Save();
+            TempData[WC.Success] = "Product delete successfully";
             return RedirectToAction("Index");
 
 

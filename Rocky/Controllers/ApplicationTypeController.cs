@@ -39,8 +39,10 @@ namespace Rocky.Controllers
             {
                 _appTypeRepos.Add(obj);
                 _appTypeRepos.Save();
+                TempData[WC.Success] = "Application Type created successfully";
                 return RedirectToAction("Index");
             }
+            TempData[WC.Error] = "Error while creating Application Type";
             return View();
         }
 
@@ -70,8 +72,10 @@ namespace Rocky.Controllers
             {
                 _appTypeRepos.Update(obj);
                 _appTypeRepos.Save();
+                TempData[WC.Success] = "Application Type edit successfully";
                 return RedirectToAction("Index");
             }
+            TempData[WC.Error] = "Error while editing Application Type";
             return View();
         }
 
@@ -99,10 +103,12 @@ namespace Rocky.Controllers
         {
             if (obj == null)
             {
+                TempData[WC.Error] = "Error when deleting an Application Type";
                 return NotFound();
             }
             _appTypeRepos.Remove(obj);
             _appTypeRepos.Save();
+            TempData[WC.Success] = "Application Type delete successfully";
             return RedirectToAction("Index");
         }
     }

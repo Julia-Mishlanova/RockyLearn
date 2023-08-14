@@ -21,7 +21,6 @@ namespace Rocky.Utility
 
             // Прикрепляем HTML-тело к сообщению
             message.Body = bodyBuilder.ToMessageBody();
-            //я тебя люблю!!!!!!
             var configuration = new ConfigurationBuilder()
                 .AddUserSecrets<Program>()
                 .Build();
