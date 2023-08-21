@@ -21,6 +21,8 @@ using Rocky_DataAccess.Data;
 using Rocky.Interfaces;
 using Rocky_DataAccess;
 using Rocky_DataAccess.Repository.IRepository;
+using Rocky.Utility.BrainTree;
+using Braintree;
 
 namespace Rocky.Controllers
 {
@@ -37,6 +39,7 @@ namespace Rocky.Controllers
         private readonly IMailSender _mailSender;
         private readonly IMailTemplater _mailTemplater;
         private readonly IMessageFormater _messageFormater;
+        private readonly IBrainTreeGate _brain;
 
         [BindProperty]
         public ProductUserVM ProductUserVM { get; set; }
@@ -49,7 +52,8 @@ namespace Rocky.Controllers
             IWebHostEnvironment webHostEnvironment, 
             IMailSender mailSender, 
             IMailTemplater mailTemplater, 
-            IMessageFormater messageFormater)
+            IMessageFormater messageFormater,
+            IBrainTreeGate brain)
         {
             _prodRepos = prodRepos;
             _appUserRepos = appUserRepos;
@@ -61,6 +65,7 @@ namespace Rocky.Controllers
             _mailSender = mailSender;
             _mailTemplater = mailTemplater;
             _messageFormater = messageFormater;
+            _brain = brain;
         }
         public IActionResult Index()
         {
@@ -120,6 +125,10 @@ namespace Rocky.Controllers
                 {
                     applicationUser = new ApplicationUser();
                 }
+
+                var gateway = _brain.GetGateway();
+                var clientToken = gateway.ClientToken.Generate();
+                ViewBag.ClientToken = clientToken;
             }
             else 
             {
@@ -159,7 +168,7 @@ namespace Rocky.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ActionName("Summary")]
-        public async Task<IActionResult> SummaryPost(ProductUserVM ProductUserVM)
+        public async Task<IActionResult> SummaryPost(IFormCollection collection, ProductUserVM ProductUserVM)
         {
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
@@ -195,6 +204,34 @@ namespace Rocky.Controllers
                     _orderDetailRepos.Add(orderDetail);
                 }
                 _orderDetailRepos.Save();
+
+                string nonceFromTheClient = collection["payment_method_nonce"];
+
+                var request = new TransactionRequest
+                {
+                    Amount = Convert.ToDecimal(orderHeader.FinalOrderTotal),
+                    PaymentMethodNonce = nonceFromTheClient,
+                    OrderId = orderHeader.Id.ToString(),
+                    Options = new TransactionOptionsRequest
+                    {
+                        SubmitForSettlement = true
+                    }
+                };
+
+                var gateway = _brain.GetGateway();
+                Result<Transaction> result = gateway.Transaction.Sale(request);
+
+                if (result.Target.ProcessorResponseText == "Approved")
+                {
+                    orderHeader.TransactionId = result.Target.Id;
+                    orderHeader.OrderStatus = WC.StatusApproved;
+                }
+                else
+                {
+                    orderHeader.OrderStatus = WC.StatusCancelled;
+                }
+                _orderHeaderRepos.Save();
+
                 return RedirectToAction(nameof(InquiryConfirmation), new { id = orderHeader.Id });
             }
             else 
@@ -251,6 +288,12 @@ namespace Rocky.Controllers
             shoppingCartList.Remove(shoppingCartList.FirstOrDefault(u => u.ProductId == id));
             HttpContext.Session.Set(WC.SessionCart, shoppingCartList);
             return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult Clear()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Index","Home");
         }
 
         [HttpPost]
