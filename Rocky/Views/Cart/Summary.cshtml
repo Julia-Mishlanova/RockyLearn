@@ -188,6 +188,33 @@
             });
         });
 
+        function validateInput() {
+            var fields = [
+                { elementId: "ApplicationUser_FullName", message: "Please enter Full Name!" },
+                { elementId: "ApplicationUser_PhoneNumber", message: "Please enter Phone Number!" },
+                { elementId: "ApplicationUser_Email", message: "Please enter Email!" },
+                { elementId: "ApplicationUser_StreetAddress", message: "Please enter Address!" },
+                { elementId: "ApplicationUser_State", message: "Please enter State!" },
+                { elementId: "ApplicationUser_PostalCode", message: "Please enter PostalCode!" },
+                // Добавьте остальные поля аналогично
+            ];
+            
+            for (var i = 0; i < fields.length; i++) {
+                var field = fields[i];
+                var fieldValue = document.getElementById(field.elementId).value;
+
+                if (fieldValue.toString() == '') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: field.message
+                    });
+                    return false;
+                }
+            }
+            return true;
+        }
+
     </script>
 }
 
