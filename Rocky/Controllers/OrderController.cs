@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Braintree;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Rocky.Interfaces;
 using Rocky.Utility.BrainTree;
@@ -6,6 +7,8 @@ using Rocky_DataAccess;
 using Rocky_DataAccess.Repository.IRepository;
 using Rocky_Models;
 using Rocky_Models.ViewModels;
+using System;
+using System.Data;
 using System.Linq;
 
 namespace Rocky.Controllers
@@ -18,6 +21,10 @@ namespace Rocky.Controllers
         private readonly IMailTemplater _mailTemplater;
         private readonly IMessageFormater _messageFormater;
         private readonly IBrainTreeGate _brain;
+
+        [BindProperty]
+        public OrderVM OrderVM { get; set; }
+
 
         public ProductUserVM ProductUserVM { get; set; }
         public OrderController(
@@ -36,17 +43,108 @@ namespace Rocky.Controllers
             _messageFormater = messageFormater;
             _brain = brain;
         }
-        public IActionResult Index()
+        public IActionResult Index(string searchName = null, string searchEmail = null, string searchPhone = null, string Status = null)
         {
             OrderListVM orderListVM = new OrderListVM()
             {
                 OrderHeaderList = _orderHeaderRepos.GetAll(),
-                StatusList = WC.ListStatus.ToList().Select(u => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem 
-                { 
-                    Text = u, Value = u
+                StatusList = WC.ListStatus.ToList().Select(i => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Text = i,
+                    Value = i
                 })
             };
+
+            if (!string.IsNullOrEmpty(searchName))
+            {
+                orderListVM.OrderHeaderList = orderListVM.OrderHeaderList.Where(u => u.FullName.ToLower().Contains(searchName.ToLower()));
+            }
+            if (!string.IsNullOrEmpty(searchEmail))
+            {
+                orderListVM.OrderHeaderList = orderListVM.OrderHeaderList.Where(u => u.Email.ToLower().Contains(searchEmail.ToLower()));
+            }
+            if (!string.IsNullOrEmpty(searchPhone))
+            {
+                orderListVM.OrderHeaderList = orderListVM.OrderHeaderList.Where(u => u.PhoneNumber.ToLower().Contains(searchPhone.ToLower()));
+            }
+            if (!string.IsNullOrEmpty(Status) && Status != "--Order Status--")
+            {
+                orderListVM.OrderHeaderList = orderListVM.OrderHeaderList.Where(u => u.OrderStatus.ToLower().Contains(Status.ToLower()));
+            }
+
             return View(orderListVM);
+        }
+        public IActionResult Details(int id)
+        {
+            OrderVM orderVM = new OrderVM()
+            {
+                OrderHeader = _orderHeaderRepos.FirstOrDefault(u => u.Id == id),
+                OrderDetail = _orderDetailRepos.GetAll(o => o.OrderHeader.Id == id, includeProperties: "Product"),
+            };
+        
+            return View(orderVM);
+        }
+
+        [HttpPost]
+        public IActionResult ShipOrder() 
+        { 
+            OrderHeader orderHeader = _orderHeaderRepos.FirstOrDefault(u => u.Id == OrderVM.OrderHeader.Id);
+            orderHeader.OrderStatus = WC.StatusShipped;
+            orderHeader.ShippingDate = DateTime.Now;
+            _orderHeaderRepos.Save();
+            TempData[WC.Success] = "Order Shipped Successfully";
+            return RedirectToAction(nameof(Index));
+        }
+        [HttpPost]
+        public IActionResult StartProcessing()
+        {
+            OrderHeader orderHeader = _orderHeaderRepos.FirstOrDefault(u => u.Id == OrderVM.OrderHeader.Id);
+            orderHeader.OrderStatus = WC.StatusInProcess;
+            _orderHeaderRepos.Save();
+            TempData[WC.Success] = "Order is In Process";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public IActionResult CancelOrder()
+        {
+            OrderHeader orderHeader = _orderHeaderRepos.FirstOrDefault(u => u.Id == OrderVM.OrderHeader.Id);
+
+            var gateway = _brain.GetGateway();
+            Transaction transaction = gateway.Transaction.Find(orderHeader.TransactionId);
+            if (transaction.Status == TransactionStatus.AUTHORIZED || transaction.Status == TransactionStatus.SUBMITTED_FOR_SETTLEMENT)
+            {
+                //no refund
+                Result<Transaction> resultVoid = gateway.Transaction.Void(orderHeader.TransactionId);
+            }
+            else 
+            { 
+                //refund
+                Result<Transaction> resultRefund = gateway.Transaction.Refund(orderHeader.TransactionId);
+            }
+            orderHeader.OrderStatus = WC.StatusRefunded;
+            _orderHeaderRepos.Save();
+            TempData[WC.Success] = "Order Canceled Successfully";
+
+            return RedirectToAction(nameof(Index));
+        }
+          
+        [HttpPost]
+        public IActionResult UpdateOrderDetails()
+        {
+            OrderHeader orderHeaderFromDb = _orderHeaderRepos.FirstOrDefault(u => u.Id == OrderVM.OrderHeader.Id);
+            orderHeaderFromDb.FullName = OrderVM.OrderHeader.FullName;
+            orderHeaderFromDb.PhoneNumber = OrderVM.OrderHeader.PhoneNumber;
+            orderHeaderFromDb.StreetAddress = OrderVM.OrderHeader.StreetAddress;
+            orderHeaderFromDb.City = OrderVM.OrderHeader.City;
+            orderHeaderFromDb.State = OrderVM.OrderHeader.State;
+            orderHeaderFromDb.PostalCode = OrderVM.OrderHeader.PostalCode;
+            orderHeaderFromDb.Email = OrderVM.OrderHeader.Email;
+
+            _orderHeaderRepos.Save();
+            TempData[WC.Success] = "Order Details Updated Successfully";
+
+            return RedirectToAction("Details", "Order", new { id = orderHeaderFromDb.Id });
         }
     }
 }
