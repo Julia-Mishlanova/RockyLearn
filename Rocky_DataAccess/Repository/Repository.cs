@@ -66,6 +66,7 @@ namespace Rocky_DataAccess.Repository
                     query = query.Include(includeProp);
                 }
             }
+            
             if (orderBy != null)
             {
                 query = orderBy(query);
@@ -74,6 +75,7 @@ namespace Rocky_DataAccess.Repository
             {
                 query = query.AsNoTracking();
             }
+            
             return query.ToList();
         }
 

@@ -18,7 +18,7 @@ namespace Rocky_Models
         public string ShortDesc { get; set; }
 
         [Range(1, int.MaxValue)]
-        public int Price { get; set; }
+        public float Price { get; set; }
         public string Image { get; set; }
 
         [Display(Name = "Category Type")]
