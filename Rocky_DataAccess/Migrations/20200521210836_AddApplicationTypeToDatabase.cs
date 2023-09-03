@@ -2,7 +2,7 @@
 
 namespace Rocky_DataAccess.Migrations
 {
-    public partial class AddApplicationType : Migration
+    public partial class AddApplicationTypeToDatabase : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

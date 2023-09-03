@@ -2,7 +2,7 @@
 
 namespace Rocky_DataAccess.Migrations
 {
-    public partial class AddShortDescToProduct : Migration
+    public partial class AddShortDescToProductTable : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

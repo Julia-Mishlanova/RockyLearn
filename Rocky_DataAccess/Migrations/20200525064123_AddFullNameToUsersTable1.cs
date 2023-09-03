@@ -2,7 +2,7 @@
 
 namespace Rocky_DataAccess.Migrations
 {
-    public partial class addApplicationUser : Migration
+    public partial class AddFullNameToUsersTable1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
