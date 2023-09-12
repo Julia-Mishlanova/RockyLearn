@@ -56,10 +56,8 @@ namespace Rocky_DataAccess.Initializer
                 PhoneNumber = "111111111111"
             }, "Admin123*").GetAwaiter().GetResult();
 
-            ApplicationUser user = _db.ApplicationUser.FirstOrDefault(u => u.Email == "admin@gmail.com");
-            _userManager.AddToRoleAsync(user, WC.AdminRole).GetAwaiter().GetResult();
-
-
+            ApplicationUser userAdmin = _db.ApplicationUser.FirstOrDefault(u => u.Email == "admin@gmail.com");
+            _userManager.AddToRoleAsync(userAdmin, WC.AdminRole).GetAwaiter().GetResult();
         }
     }
 }

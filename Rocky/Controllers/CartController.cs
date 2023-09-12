@@ -1,28 +1,26 @@
-﻿using MailKit.Net.Smtp;
-using MailKit.Security;
-using MimeKit;
-using Microsoft.Extensions.Configuration;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Braintree;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Rocky_Models;
-using Rocky_Models.ViewModels;
+using Rocky.Utility.BrainTree;
 using Rocky.Utility;
-using Microsoft.Extensions.Primitives;
-using Rocky_DataAccess.Data;
-using Rocky.Interfaces;
 using Rocky_DataAccess;
 using Rocky_DataAccess.Repository.IRepository;
-using Rocky.Utility.BrainTree;
-using Braintree;
+using Rocky_Models;
+using Rocky_Models.ViewModels;
+using MimeKit;
+using Rocky.Interfaces;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Routing;
 
 namespace Rocky.Controllers
 {
@@ -49,9 +47,9 @@ namespace Rocky.Controllers
             IInquiryDetailRepository inquiryDetailRepos,
             IOrderHeaderRepository orderHeaderRepos,
             IOrderDetailRepository orderDetailRepos,
-            IWebHostEnvironment webHostEnvironment, 
-            IMailSender mailSender, 
-            IMailTemplater mailTemplater, 
+            IWebHostEnvironment webHostEnvironment,
+            IMailSender mailSender,
+            IMailTemplater mailTemplater,
             IMessageFormater messageFormater,
             IBrainTreeGate brain)
         {
@@ -109,16 +107,18 @@ namespace Rocky.Controllers
         public IActionResult Summary()
         {
             ApplicationUser applicationUser;
+
             if (User.IsInRole(WC.AdminRole))
             {
                 if (HttpContext.Session.Get<int>(WC.SessionInquiryId) != 0)
                 {
+                    //cart has been loaded using an inquiry
                     InquiryHeader inquiryHeader = _inquiryHeaderRepos.FirstOrDefault(u => u.Id == HttpContext.Session.Get<int>(WC.SessionInquiryId));
                     applicationUser = new ApplicationUser()
                     {
                         Email = inquiryHeader.Email,
                         FullName = inquiryHeader.FullName,
-                        PhoneNumber = inquiryHeader.PhoneNumber,
+                        PhoneNumber = inquiryHeader.PhoneNumber
                     };
                 }
                 else
@@ -129,8 +129,9 @@ namespace Rocky.Controllers
                 var gateway = _brain.GetGateway();
                 var clientToken = gateway.ClientToken.Generate();
                 ViewBag.ClientToken = clientToken;
+
             }
-            else 
+            else
             {
                 var claimsIdentity = (ClaimsIdentity)User.Identity;
                 var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
@@ -138,7 +139,8 @@ namespace Rocky.Controllers
 
                 applicationUser = _appUserRepos.FirstOrDefault(u => u.Id == claim.Value);
             }
-            
+
+
             List<ShoppingCart> shoppingCartList = new List<ShoppingCart>();
             if (HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart) != null
                 && HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart).Count() > 0)
@@ -155,7 +157,8 @@ namespace Rocky.Controllers
                 ApplicationUser = applicationUser,
             };
 
-            foreach (var cartObj in shoppingCartList) 
+
+            foreach (var cartObj in shoppingCartList)
             {
                 Product prodTemp = _prodRepos.FirstOrDefault(u => u.Id == cartObj.ProductId);
                 prodTemp.TempSqFt = cartObj.SqFt;
@@ -167,8 +170,8 @@ namespace Rocky.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [ActionName("Summary")]
-        public async Task<IActionResult> SummaryPost(IFormCollection collection, ProductUserVM ProductUserVM)
+        //[ActionName("Summary")]
+        public IActionResult Summary(IFormCollection collection, ProductUserVM ProductUserVM)
         {
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
@@ -202,6 +205,7 @@ namespace Rocky.Controllers
                         ProductId = prod.Id
                     };
                     _orderDetailRepos.Add(orderDetail);
+
                 }
                 _orderDetailRepos.Save();
 
@@ -231,11 +235,11 @@ namespace Rocky.Controllers
                     orderHeader.OrderStatus = WC.StatusCancelled;
                 }
                 _orderHeaderRepos.Save();
-
                 return RedirectToAction(nameof(InquiryConfirmation), new { id = orderHeader.Id });
             }
-            else 
+            else
             {
+                //we need to create an inquiry
                 var sender = new MailboxAddress("Rocky", WC.EmailAdmin);
                 var receiver = new MailboxAddress(ProductUserVM.ApplicationUser.FullName, ProductUserVM.ApplicationUser.Email);
 
@@ -265,18 +269,20 @@ namespace Rocky.Controllers
                     _inquiryDetailRepos.Add(inquiryDetail);
                 }
                 _inquiryDetailRepos.Save();
+                TempData[WC.Success] = "Inquiry submitted successfully";
             }
+
             return RedirectToAction(nameof(InquiryConfirmation));
         }
         public IActionResult InquiryConfirmation(int id = 0)
         {
-            OrderHeader orderHeader = _orderHeaderRepos.FirstOrDefault(x => x.Id == id);
+            OrderHeader orderHeader = _orderHeaderRepos.FirstOrDefault(u => u.Id == id);
             HttpContext.Session.Clear();
             return View(orderHeader);
         }
+
         public IActionResult Remove(int id)
         {
-
             List<ShoppingCart> shoppingCartList = new List<ShoppingCart>();
             if (HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart) != null
                 && HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart).Count() > 0)
@@ -290,25 +296,24 @@ namespace Rocky.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Clear()
-        {
-            HttpContext.Session.Clear();
-            return RedirectToAction("Index","Home");
-        }
-
         [HttpPost]
-        public IActionResult UpdateCart(IEnumerable<Product> prodList)
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdateCart(IEnumerable<Product> ProdList)
         {
             List<ShoppingCart> shoppingCartList = new List<ShoppingCart>();
-            foreach (Product prod in prodList)
+            foreach (Product prod in ProdList)
             {
                 shoppingCartList.Add(new ShoppingCart { ProductId = prod.Id, SqFt = prod.TempSqFt });
             }
+
             HttpContext.Session.Set(WC.SessionCart, shoppingCartList);
             return RedirectToAction(nameof(Index));
         }
 
-
-
+        public IActionResult Clear()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Index", "Home");
+        }
     }
 }

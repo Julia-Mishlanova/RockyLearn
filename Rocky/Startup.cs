@@ -17,6 +17,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Rocky.Utility.BrainTree;
 using Rocky_DataAccess.Initializer;
+using Microsoft.Extensions.Logging;
 
 namespace Rocky
 {

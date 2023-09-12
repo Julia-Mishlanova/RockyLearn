@@ -154,7 +154,7 @@
                             }
                             else
                             {
-                                <button type="submit" onclick="return validateInput()" class="btn btn-primary form-control">Submit Inquiry</button>
+                                <button class="btn btn-success form-control" onclick="return validateInput()" id="submit-button">Submit Inquiry</button>
                             }
                         </div>
                     </div>
@@ -197,7 +197,6 @@
                 { elementId: "ApplicationUser_City", message: "Please enter City!" },
                 { elementId: "ApplicationUser_State", message: "Please enter State!" },
                 { elementId: "ApplicationUser_PostalCode", message: "Please enter Postal Code!" },
-                // Добавьте остальные поля аналогично
             ];
 
             for (var i = 0; i < fields.length; i++) {
@@ -216,6 +215,7 @@
             return true;
         }
 
+        
     </script>
 }
 
