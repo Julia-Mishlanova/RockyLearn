@@ -125,9 +125,18 @@
                                     }
                                 </div>
                                 <div class="col-6 col-md-3">
-                                    <button type="submit" class="btn btn-success form-control ">
-                                        <span>Continue</span>
-                                    </button>
+                                    @if (User.IsInRole(WC.AdminRole))
+                                    {
+                                        <button type="submit" class="btn btn-success form-control ">
+                                            <span>Continue</span>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-success form-control ">
+                                            <span>Submit Inquiry</span>
+                                        </button>
+                                    }
                                 </div>
                             </div>
                         </div>

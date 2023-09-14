@@ -165,6 +165,10 @@ namespace Rocky.Controllers
                 ProductUserVM.ProductList.Add(prodTemp);
             }
 
+            if (User.IsInRole(WC.CustomerRole))
+            {
+                Summary(null, ProductUserVM);
+            }
             return View(ProductUserVM);
         }
 
